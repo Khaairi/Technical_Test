@@ -33,10 +33,10 @@ def add_document(
     embedder: EmbeddingService = Depends(get_embedder)
 ):
     try:
-        id = str(uuid.uuid4())
+        doc_id = str(uuid.uuid4())
         vector = embedder.embed(text=req.text)
-        doc_id = db.upsert(doc_id=id, text=req.text, vector=vector)
-        return {"id": doc_id, "status": "added"}
+        saved_id = db.upsert(doc_id=doc_id, text=req.text, vector=vector)
+        return {"id": saved_id, "status": "added"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
