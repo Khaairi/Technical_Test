@@ -14,6 +14,13 @@ def ask_question(
     req: _schemas.QuestionRequest,
     rag: RAGWorkflow = Depends(get_rag_service)
 ):
+    """
+    Endpoint to handle user questions using the RAG pipeline.
+
+    Args:
+        req: Question request
+        rag: Injected RAG workflow instance
+    """
     start = time.time()
     try:
         result = rag.process_question(req.question)
@@ -32,11 +39,22 @@ def add_document(
     db: DB = Depends(get_db),
     embedder: EmbeddingService = Depends(get_embedder)
 ):
+    """
+    Endpoint to ingest new documents to the knowledge base.
+    
+    Args:
+        req: Document to add
+        db: Injected document storage
+        embedder: Injected embedding service
+    """
     try:
+        # generate a unique ID for the document
         doc_id = str(uuid.uuid4())
+        # create vector embedding
         vector = embedder.embed(text=req.text)
-        saved_id = db.upsert(doc_id=doc_id, text=req.text, vector=vector)
-        return {"id": saved_id, "status": "added"}
+        # save to storage 
+        db.upsert(doc_id=doc_id, text=req.text, vector=vector)
+        return {"id": doc_id, "status": "added"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
@@ -45,6 +63,13 @@ def status(
     db: DB = Depends(get_db),
     rag: RAGWorkflow = Depends(get_rag_service)
 ):
+    """Get system status.
+    
+    Args:
+        db: Injected document storage
+        rag: Injected RAG workflow instance
+        
+    """
     db_status = db.get_status()
     chain_status = rag.get_status()
     return {
