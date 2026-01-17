@@ -1,10 +1,10 @@
 import time
 from fastapi import FastAPI, HTTPException
 import schemas as _schemas
-from database import QdrantDB
+from database import get_db_instance
 from services import EmbeddingService, RAGService
 
-db = QdrantDB(host="http://localhost:6333")
+db = get_db_instance()
 
 embedder = EmbeddingService()
 

@@ -2,6 +2,7 @@ import random
 from langgraph.graph import StateGraph, END
 from typing import Dict, List
 from database import DB
+import uuid
 
 class EmbeddingService:
     def fake_embed(self, text: str) -> List[float]:
@@ -46,9 +47,10 @@ class RAGService:
     def process_question(self, question: str) -> Dict:
         return self.chain.invoke({"question": question})
 
-    def ingest_document(self, text: str) -> int:
+    def ingest_document(self, text: str) -> str:
+        doc_id = str(uuid.uuid4())
         vector = self.embedder.fake_embed(text=text)
-        return self.db.upsert(text=text, vector=vector)
+        return self.db.upsert(doc_id=doc_id, text=text, vector=vector)
     
     def get_status(self) -> bool:
         return self.chain is not None
